@@ -82,7 +82,7 @@
 			DWRAmrsReportService.viewMoreDetailsRender(String bff,String id);
 			DWRAmrsReportService.downloadCSV(String csvFile);
 			DWRAmrsReportService.downloadPDF(String file);
-			DWRAmrsReportService.saveUserLoc(String suser,String syslocc);
+			DWRAmrsReportService.saveUserLoc(Integer suser,Integer syslocc);
 			DWRAmrsReportService.purgeUserLocation(Integer rowid);
 			DWRAmrsReportService.purgeMultiplePrivileges(ArrayList myList);
 			]]>
