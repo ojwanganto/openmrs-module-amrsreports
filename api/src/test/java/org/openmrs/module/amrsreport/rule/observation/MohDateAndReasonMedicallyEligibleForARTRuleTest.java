@@ -99,7 +99,7 @@ public class MohDateAndReasonMedicallyEligibleForARTRuleTest extends BaseModuleC
         /*Checks if the Encounter has been saved*/
         Assert.assertNotNull("Encounter is Null",resEncounter);
 
-        /*Checks to find id patient Id is not null*/
+        /*Checks to find if patient Id is not null*/
         Assert.assertNotNull("PatientID is Null",patientID);
 
 
