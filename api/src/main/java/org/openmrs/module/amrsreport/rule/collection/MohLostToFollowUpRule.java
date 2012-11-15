@@ -13,6 +13,7 @@ import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
+import org.openmrs.api.EncounterService;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicContext;
 import org.openmrs.logic.LogicException;
@@ -30,8 +31,10 @@ public class MohLostToFollowUpRule  extends MohEvaluableRule {
  	private static final Log log = LogFactory.getLog(MohLostToFollowUpRule.class);
  
  	public static final String TOKEN = "MOH LTFU-TO-DEAD";
+
  	
  	/**
+      * @should get date and reason why a patient was lost
 	 * @see org.openmrs.logic.Rule#eval(org.openmrs.logic.LogicContext, org.openmrs.Patient,
 	 *      java.util.Map)
  	 */
@@ -45,75 +48,41 @@ public class MohLostToFollowUpRule  extends MohEvaluableRule {
 			return new Result("DEAD | " + sdf.format(patient.getDeathDate()));
 		else if(patient.getCauseOfDeath() != null)
 			return new Result("DEAD | " + sdf.format(patient.getDeathDate()));
+
 		List<Encounter> e = Context.getEncounterService().getEncountersByPatient(patient);
 		EncounterType encTpInit = Context.getEncounterService().getEncounterType(MohEvaluableNameConstants.ENCOUNTER_TYPE_ADULT_INITIAL);
 		EncounterType encTpRet = Context.getEncounterService().getEncounterType(MohEvaluableNameConstants.ENCOUNTER_TYPE_ADULT_RETURN);
 		// DEAD
+        EncounterService et = Context.getEncounterService();
 		for (Iterator<Encounter> it = e.iterator(); it.hasNext();) {
 		    Encounter encounter = it.next();
-		    if (Context.getEncounterService().getEncounterType(31) == encounter.getEncounterType())
-		    	return new Result("DEAD | " + sdf.format(encounter.getEncounterDatetime()));
+		    if (et.getEncounterType(31) == encounter.getEncounterType()){
+                return new Result("DEAD | " + sdf.format(encounter.getEncounterDatetime()));
+            }
+            else if((encTpInit == encounter.getEncounterType()) || (encounter.getEncounterType() == encTpRet)){
+                int requiredTimeToShowup = (int) (1000 * 60 * 60 * 24 * 30.4375 * 6);
+                int todayTimeFromEncounter = (int) ((new Date()).getTime() - (encounter.getEncounterDatetime().getTime()));
+                if(!(requiredTimeToShowup >= todayTimeFromEncounter)){
+                    return new Result("LTFU | " + sdf.format(encounter.getEncounterDatetime()));
+                }
+                break;
+            }
+
 		    @SuppressWarnings({ "deprecation" })
 			Set<Obs> o = Context.getObsService().getObservations(encounter);
 		    for (Iterator<Obs> obs = o.iterator();obs.hasNext();) {
 		    	Obs ob = obs.next();
-		    	if(ob.getConcept() == Context.getConceptService().getConcept("DATE OF DEATH")){
-					return new Result("DEAD | " + sdf.format(sdf.format(ob.getObsDatetime())));
-				}else if(ob.getConcept() == Context.getConceptService().getConcept("DEATH REPORTED BY")){
-					return new Result("DEAD | " + sdf.format(sdf.format(ob.getObsDatetime())));
-				}else if(ob.getConcept() == Context.getConceptService().getConcept("CAUSE FOR DEATH")){
-					return new Result("DEAD | " + sdf.format(sdf.format(ob.getObsDatetime())));
-				}else if(/*(ob.getConcept() == Context.getConceptService().getConcept("REASON FOR MISSED VISIT")) &&
-						(*/ob.getValueCoded() == Context.getConceptService().getConcept("DECEASED")){
-					return new Result("DEAD | " + sdf.format(sdf.format(ob.getObsDatetime())));
-				}else if(/*(ob.getConcept() == Context.getConceptService().getConcept("REASON EXITED CARE")) &&
-						(*/ob.getValueCoded() == Context.getConceptService().getConcept("PATIENT DIED")){
-					return new Result("DEAD | " + sdf.format(ob.getObsDatetime()));
-				}/*else if((ob.getConcept() == Context.getConceptService().getConcept("OUTCOME AT END OF TUBERCULOSIS TREATMENT")) &&
-						(ob.getValueCoded() == Context.getConceptService().getConcept("DECEASED"))){
-					return new Result("DEAD - " + sdf.format(ob.getObsDatetime()));
-				}*/
-				
-				if(ob.getConcept() == Context.getConceptService().getConcept("TRANSFER CARE TO OTHER CENTER")){
-					if(ob.getValueCoded() == Context.getConceptService().getConcept("AMPATH"))
-						return new Result("TO | (Ampath) " + sdf.format(ob.getObsDatetime()));
-					else
-						return new Result("TO | (Non-Ampath) " + sdf.format(ob.getObsDatetime()));
-				}
+		   LostToFollowUpPatientSnapshot lostToFollowUpPatientSnapshot = new LostToFollowUpPatientSnapshot();
+                lostToFollowUpPatientSnapshot.consume(ob);
+
 				if((encTpInit == encounter.getEncounterType()) || (encounter.getEncounterType() == encTpRet)){
-					if(ob.getConcept().getConceptId() == Context.getConceptService().getConcept(MohEvaluableNameConstants.RETURN_VISIT_DATE).getConceptId()){
-						if(sdf.format(ob.getObsDatetime()) != null){
-							long requiredTimeToShowup = ((ob.getValueDatetime().getTime()) - (ob.getObsDatetime().getTime())) + (long)(1000 * 60 * 60 * 24 * 30.4375 * 3);
-							long todayTimeFromSchedule = (new Date()).getTime() - (ob.getObsDatetime().getTime());
-							if( requiredTimeToShowup < todayTimeFromSchedule ){
-								return new Result("LTFU | " + sdf.format(ob.getValueDatetime()));
-							}
-						}
-					}
-					if(ob.getConcept() == Context.getConceptService().getConcept("RETURN VISIT DATE, EXPRESS CARE NURSE")){
-						if(sdf.format(ob.getObsDatetime()) != null){
-							long requiredTimeToShowup = ((ob.getValueDatetime().getTime()) - (ob.getObsDatetime().getTime())) + (long)(1000 * 60 * 60 * 24 * 30.4375 * 3);
-							long todayTimeFromSchedule = (new Date()).getTime() - (ob.getObsDatetime().getTime());
-							if( requiredTimeToShowup < todayTimeFromSchedule ){
-								return new Result("LTFU | " + sdf.format(ob.getValueDatetime()));
-							}
-						}
-					}
+                    LostToFollowUpPatientSnapshot lostToFollowUpPatientSnapshott = new LostToFollowUpPatientSnapshot();
+                    lostToFollowUpPatientSnapshott.consume(ob);
+
 				}
 	        }
 		}
-		
-		for (Iterator<Encounter> it = e.iterator(); it.hasNext();) {
-		    Encounter encounter = it.next();
-		    if((encTpInit == encounter.getEncounterType()) || (encounter.getEncounterType() == encTpRet)){
-		    	int requiredTimeToShowup = (int) (1000 * 60 * 60 * 24 * 30.4375 * 6);
-				int todayTimeFromEncounter = (int) ((new Date()).getTime() - (encounter.getEncounterDatetime().getTime()));
-				if(!(requiredTimeToShowup >= todayTimeFromEncounter)){
-					return new Result("LTFU | " + sdf.format(encounter.getEncounterDatetime()));
-				}
-		    	break;
-		    }
-		}
+
 		} catch (Exception e) {}
 		return new Result("");
  	}

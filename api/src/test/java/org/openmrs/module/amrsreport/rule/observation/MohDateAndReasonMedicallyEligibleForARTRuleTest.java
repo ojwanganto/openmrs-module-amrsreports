@@ -72,7 +72,7 @@ public class MohDateAndReasonMedicallyEligibleForARTRuleTest extends BaseModuleC
         PatientIdentifier pi = new PatientIdentifier("23452",pit, null);
         pi.setPatient(patient);
 
-        Date birthdate =     new Date(1975,01,01);
+        Date birthdate =     new Date(1975,1,1);
         patient.setBirthdate(birthdate);
 
         EncounterService service = Context.getEncounterService();
