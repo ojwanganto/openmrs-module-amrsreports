@@ -40,48 +40,47 @@ public class MohLostToFollowUpRule  extends MohEvaluableRule {
  	 */
 	public Result evaluate(LogicContext context, Integer patientId, Map<String, Object> parameters) throws LogicException {
 	 try {
+
 		Patient patient = Context.getPatientService().getPatient(patientId);
 		SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
-		if(patient.getDead())
+
+		if(patient.getDead()){
 			return new Result("DEAD | " + sdf.format(patient.getDeathDate()));
-		else if(patient.getDeathDate() != null)
+        }
+		else if(patient.getDeathDate() != null){
 			return new Result("DEAD | " + sdf.format(patient.getDeathDate()));
-		else if(patient.getCauseOfDeath() != null)
+        }
+		else if(patient.getCauseOfDeath() != null){
 			return new Result("DEAD | " + sdf.format(patient.getDeathDate()));
+        }
+
+
+
 
 		List<Encounter> e = Context.getEncounterService().getEncountersByPatient(patient);
-		EncounterType encTpInit = Context.getEncounterService().getEncounterType(MohEvaluableNameConstants.ENCOUNTER_TYPE_ADULT_INITIAL);
-		EncounterType encTpRet = Context.getEncounterService().getEncounterType(MohEvaluableNameConstants.ENCOUNTER_TYPE_ADULT_RETURN);
-		// DEAD
-        EncounterService et = Context.getEncounterService();
-		for (Iterator<Encounter> it = e.iterator(); it.hasNext();) {
-		    Encounter encounter = it.next();
-		    if (et.getEncounterType(31) == encounter.getEncounterType()){
-                return new Result("DEAD | " + sdf.format(encounter.getEncounterDatetime()));
+
+         LostToFollowUpPatientSnapshot lostToFollowUpPatientSnapshot = new LostToFollowUpPatientSnapshot();
+        /*Loop through Encounters*/
+        for(Encounter encounter:e){
+            if(lostToFollowUpPatientSnapshot.consume(encounter)){
+
+                return new Result(lostToFollowUpPatientSnapshot.getProperty("reason").toString());
+
             }
-            else if((encTpInit == encounter.getEncounterType()) || (encounter.getEncounterType() == encTpRet)){
-                int requiredTimeToShowup = (int) (1000 * 60 * 60 * 24 * 30.4375 * 6);
-                int todayTimeFromEncounter = (int) ((new Date()).getTime() - (encounter.getEncounterDatetime().getTime()));
-                if(!(requiredTimeToShowup >= todayTimeFromEncounter)){
-                    return new Result("LTFU | " + sdf.format(encounter.getEncounterDatetime()));
+
+
+            /*Loop through Observations*/
+            @SuppressWarnings({ "deprecation" })
+            Set<Obs> o = Context.getObsService().getObservations(encounter);
+            for (Obs ob:o) {
+                if(lostToFollowUpPatientSnapshot.consume(ob)){
+                    return new Result(lostToFollowUpPatientSnapshot.getProperty("reason").toString());
                 }
-                break;
+
             }
 
-		    @SuppressWarnings({ "deprecation" })
-			Set<Obs> o = Context.getObsService().getObservations(encounter);
-		    for (Iterator<Obs> obs = o.iterator();obs.hasNext();) {
-		    	Obs ob = obs.next();
-		   LostToFollowUpPatientSnapshot lostToFollowUpPatientSnapshot = new LostToFollowUpPatientSnapshot();
-                lostToFollowUpPatientSnapshot.consume(ob);
+        }
 
-				if((encTpInit == encounter.getEncounterType()) || (encounter.getEncounterType() == encTpRet)){
-                    LostToFollowUpPatientSnapshot lostToFollowUpPatientSnapshott = new LostToFollowUpPatientSnapshot();
-                    lostToFollowUpPatientSnapshott.consume(ob);
-
-				}
-	        }
-		}
 
 		} catch (Exception e) {}
 		return new Result("");
