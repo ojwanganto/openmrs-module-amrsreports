@@ -33,6 +33,12 @@ public class LostToFollowUpPatientSnapshot extends PatientSnapshot {
 
 
     SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
+
+    /**
+     * @should find out if a particular Obs is consumed
+     * @param o observation to be consumed
+     * @return
+     */
     @Override
     public Boolean consume(Obs o){
         Concept ob = o.getConcept();
@@ -99,7 +105,11 @@ public class LostToFollowUpPatientSnapshot extends PatientSnapshot {
         return false;
     }
 
-
+    /**
+     * @should test if a given encounter is consumed
+     * @param e
+     * @return
+     */
     public Boolean consume(Encounter e){
 
         EncounterType encTpInit = Context.getEncounterService().getEncounterType(MohEvaluableNameConstants.ENCOUNTER_TYPE_ADULT_INITIAL);

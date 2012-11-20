@@ -42,44 +42,39 @@ public class MohLostToFollowUpRule  extends MohEvaluableRule {
 	 try {
 
 		Patient patient = Context.getPatientService().getPatient(patientId);
+        Boolean patientDead = patient.getDead();
+
 		SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
 
-		if(patient.getDead()){
-			return new Result("DEAD | " + sdf.format(patient.getDeathDate()));
-        }
-		else if(patient.getDeathDate() != null){
-			return new Result("DEAD | " + sdf.format(patient.getDeathDate()));
-        }
-		else if(patient.getCauseOfDeath() != null){
-			return new Result("DEAD | " + sdf.format(patient.getDeathDate()));
+        if(patient.getDeathDate()!=null){
+                return new Result("DEAD | " + sdf.format(patient.getDeathDate()));
+
         }
 
+            List<Encounter> e = Context.getEncounterService().getEncountersByPatient(patient);
 
+            LostToFollowUpPatientSnapshot lostToFollowUpPatientSnapshot = new LostToFollowUpPatientSnapshot();
+            /*Loop through Encounters*/
+            for(Encounter encounter:e){
+                if(lostToFollowUpPatientSnapshot.consume(encounter)){
 
-
-		List<Encounter> e = Context.getEncounterService().getEncountersByPatient(patient);
-
-         LostToFollowUpPatientSnapshot lostToFollowUpPatientSnapshot = new LostToFollowUpPatientSnapshot();
-        /*Loop through Encounters*/
-        for(Encounter encounter:e){
-            if(lostToFollowUpPatientSnapshot.consume(encounter)){
-
-                return new Result(lostToFollowUpPatientSnapshot.getProperty("reason").toString());
-
-            }
-
-
-            /*Loop through Observations*/
-            @SuppressWarnings({ "deprecation" })
-            Set<Obs> o = Context.getObsService().getObservations(encounter);
-            for (Obs ob:o) {
-                if(lostToFollowUpPatientSnapshot.consume(ob)){
                     return new Result(lostToFollowUpPatientSnapshot.getProperty("reason").toString());
+
+                }
+
+                /*Loop through Observations*/
+                @SuppressWarnings({ "deprecation" })
+                Set<Obs> o = Context.getObsService().getObservations(encounter);
+                for (Obs ob:o) {
+                    if(lostToFollowUpPatientSnapshot.consume(ob)){
+                        return new Result(lostToFollowUpPatientSnapshot.getProperty("reason").toString());
+                    }
+
                 }
 
             }
 
-        }
+
 
 
 		} catch (Exception e) {}
