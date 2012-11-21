@@ -27,8 +27,8 @@ public class MohGenderRuleTest extends BaseModuleContextSensitiveTest {
         Patient patient = Context.getPatientService().getPatient(8);
         Patient patient1 = Context.getPatientService().getPatient(2);
 
-        Assert.assertTrue("patient returned null",patient!=null);
-        Assert.assertTrue("patient1 returned null",patient1!=null);
+        Assert.assertNotNull("patient returned null",patient);
+        Assert.assertNotNull("patient1 returned null",patient1);
 
         String expectedString="F";
         String expectedString1="M";
@@ -37,7 +37,8 @@ public class MohGenderRuleTest extends BaseModuleContextSensitiveTest {
         String foundString= mohGenderRule.evaluate(null,patient.getId(),null).toString();
         String foundString1= mohGenderRule.evaluate(null,patient1.getId(),null).toString();
 
-        Assert.assertTrue(foundString, expectedString.equals(foundString));
-        Assert.assertTrue(foundString1, expectedString1.equals(foundString1));
+        Assert.assertEquals("Female was not found",expectedString, foundString);
+        Assert.assertEquals("Male was not found",expectedString1, foundString1);
+
     }
 }
