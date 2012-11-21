@@ -14,14 +14,6 @@
 
 package org.openmrs.module.amrsreport.rule.collection;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,7 +27,8 @@ import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicContext;
 import org.openmrs.logic.result.Result;
 import org.openmrs.module.amrsreport.rule.MohEvaluableRule;
-import org.openmrs.module.amrsreport.rule.util.MohRuleUtils;
+
+import java.util.*;
 
 public class MohPregnancyPMTCReferralRule extends MohEvaluableRule {
 
@@ -81,6 +74,8 @@ public class MohPregnancyPMTCReferralRule extends MohEvaluableRule {
 
     private List<Concept> cachedQuestions = null;
 
+
+
     /**
      * @param context
      * @param patientId
@@ -91,6 +86,7 @@ public class MohPregnancyPMTCReferralRule extends MohEvaluableRule {
     @Override
     protected Result evaluate(final LogicContext context, final Integer patientId, final Map<String, Object> parameters) {
 
+            MohPregnancyPMTCReferralRuleSnapshot mohPregnancyPMTCReferralRuleSnapshot=new MohPregnancyPMTCReferralRuleSnapshot();
             Result result = new Result();
 
             ConceptService conceptService = Context.getConceptService();
@@ -108,7 +104,7 @@ public class MohPregnancyPMTCReferralRule extends MohEvaluableRule {
                     else if (observation.getConcept().equals(getCachedConcept(ESTIMATED_DATE_OF_CONFINEMENT_ULTRASOUND)))
                             dueDate = observation.getValueDatetime();
 
-                    if (isPregnant(observation))
+                    if (mohPregnancyPMTCReferralRuleSnapshot.consume(observation))
                             result = new Result(new Date(), Result.Datatype.DATETIME, Boolean.TRUE, null, dueDate, null, "PMTCT", null);
                     else
                             result = new Result(new Date(), Result.Datatype.DATETIME, Boolean.FALSE, null, null, null, StringUtils.EMPTY, null);
@@ -117,100 +113,22 @@ public class MohPregnancyPMTCReferralRule extends MohEvaluableRule {
             return result;
     }
 
-    private Boolean isPregnant(Obs obs) {
-            Concept concept = obs.getConcept();
-            Date valueDatetime = obs.getValueDatetime();
-            Double valueNumeric = obs.getValueNumeric();
-            Concept valueCoded = obs.getValueCoded();
-
-            // ESTIMATED DATE OF CONFINEMENT (5596)-OBS. DATE)<=42 OR
-            if (concept.equals(getCachedConcept(ESTIMATED_DATE_OF_CONFINEMENT))) {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(obs.getObsDatetime());
-                    calendar.add(Calendar.DATE, 42 * 7);
-                    if (calendar.getTime().after(valueDatetime))
-                            return true;
-            }
-
-            // ESTIMATED DATE OF CONFINEMENT, ULTRASOUND (6743)-OBS. DATE)<=294 OR
-            if (concept.equals(getCachedConcept(ESTIMATED_DATE_OF_CONFINEMENT_ULTRASOUND))) {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(obs.getObsDatetime());
-                    calendar.add(Calendar.DATE, 294);
-                    if (calendar.getTime().after(valueDatetime))
-                            return true;
-            }
-
-            // CURRENT PREGNANT (5272)=YES (1065) OR
-            if (concept.equals(getCachedConcept(CURRENT_PREGNANT))) {
-                    if (valueCoded.equals(getCachedConcept(YES)))
-                            return true;
-            }
-
-            // NO OF WEEK OF PREGNANCY (1279)>0 OR
-            if (concept.equals(getCachedConcept(NO_OF_WEEK_OF_PREGNANCY))) {
-                    if (valueNumeric > 0)
-                            return true;
-            }
-
-            // MONTH OF CURRENT GESTATION (5992)>0 OR
-            if (concept.equals(getCachedConcept(MONTH_OF_CURRENT_GESTATION))) {
-                    if (valueNumeric > 0)
-                            return true;
-            }
-
-            // FUNDAL LENGTH (1855) >0 OR
-            if (concept.equals(getCachedConcept(FUNDAL_LENGTH))) {
-                    if (valueNumeric > 0)
-                            return true;
-            }
-
-            // PREGNANCY URINE TEST (45)=POSITIVE (703) OR
-            if (concept.equals(getCachedConcept(PREGNANCY_URINE_TEST))) {
-                    if (valueCoded.equals(getCachedConcept(POSITIVE)))
-                            return true;
-            }
-
-            // URGENT MEDICAL ISSUES (1790) = PREGNANCY (44) OR
-            if (concept.equals(getCachedConcept(URGENT_MEDICAL_ISSUES))) {
-                    if (valueCoded.equals(getCachedConcept(PREGNANCY)))
-                            return true;
-            }
-
-            /*// PROBLEM ADDED (6042) = PREGNANCY, ECTOPIC (46) OR
-            if (concept.equals(getCachedConcept(PROBLEM_ADDED))) {
-                    if (valueCoded.equals(getCachedConcept(PREGNANCY_ECTOPIC)))
-                            return true;
-            }*/
-
-            // FOETAL MOVEMENT (1856)=YES (1065) OR
-            if (concept.equals(getCachedConcept(FOETAL_MOVEMENT))) {
-                    if (valueCoded.equals(getCachedConcept(YES)))
-                            return true;
-            }
-
-            // REASON FOR CURRENT VISIT (1834)=ANTENATAL CARE (1831) OR
-            if (concept.equals(getCachedConcept(REASON_FOR_CURRENT_VISIT))) {
-                    if (valueCoded.equals(getCachedConcept(ANTENATAL_CARE)))
-                            return true;
-            }
-
-            // REASON FOR NEXT VISIT (1835)=ANTENATAL CARE (1831) OR
-            if (concept.equals(getCachedConcept(REASON_FOR_NEXT_VISIT))) {
-                    if (valueCoded.equals(getCachedConcept(ANTENATAL_CARE)))
-                            return true;
-            }
-
-            return false;
+    /**
+     * maintains a cache of concepts and stores them by name
+     *
+     * @param name the name of the cached concept to retrieve
+     * @return the concept matching the name
+     */
+    private  Concept getCachedConcept(String name) {
+        if (cachedConcepts == null) {
+            cachedConcepts = new HashMap<String, Concept>();
+        }
+        if (!cachedConcepts.containsKey(name)) {
+            cachedConcepts.put(name, Context.getConceptService().getConcept(name));
+        }
+        return cachedConcepts.get(name);
     }
 
-    private Concept getCachedConcept(String name) {
-            if (cachedConcepts == null)
-                    cachedConcepts = new HashMap<String, Concept>();
-            if (!cachedConcepts.containsKey(name))
-                    cachedConcepts.put(name, Context.getConceptService().getConcept(name));
-            return cachedConcepts.get(name);
-    }
 
     private List<Concept> getQuestionConcepts() {
             if (cachedQuestions == null) {
