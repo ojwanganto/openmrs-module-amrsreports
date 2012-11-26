@@ -27,10 +27,17 @@ public class MohGenderRule extends MohEvaluableRule {
 
     public static final String TOKEN ="MOH Gender";
 
-
+    /**
+     * @should get Gender of a patient
+     * @param context
+     * @param patientId
+     * @param parameters
+     * @return
+     * @throws LogicException
+     */
     public Result evaluate(LogicContext context, Integer patientId, Map<String, Object> parameters) throws LogicException {
 
-      String gender="";
+        String gender="";
 
         Patient patient = Context.getPatientService().getPatient(patientId);
 
@@ -38,7 +45,7 @@ public class MohGenderRule extends MohEvaluableRule {
 
         if(!StringUtils.isEmpty(patient.getGender()))
 
-           gender=patient.getGender();
+            gender=patient.getGender();
 
 
 
