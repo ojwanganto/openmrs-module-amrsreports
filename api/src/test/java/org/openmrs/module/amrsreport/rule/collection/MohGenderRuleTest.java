@@ -10,11 +10,7 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import java.lang.String;
 
 /**
- * Created with IntelliJ IDEA.
- * User: oliver
- * Date: 11/21/12
- * Time: 12:01 PM
- * To change this template use File | Settings | File Templates.
+ *Test file for MohGenderRuleTest
  */
 public class MohGenderRuleTest extends BaseModuleContextSensitiveTest {
     /**
