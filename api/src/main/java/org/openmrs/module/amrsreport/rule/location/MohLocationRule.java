@@ -3,11 +3,8 @@ package org.openmrs.module.amrsreport.rule.location;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
-import org.openmrs.Encounter;
-import org.openmrs.EncounterType;
 import org.openmrs.Obs;
 import org.openmrs.OpenmrsObject;
-import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
 import org.openmrs.logic.LogicContext;
 import org.openmrs.logic.result.Result;
@@ -16,13 +13,8 @@ import org.openmrs.module.amrsreport.rule.MohEvaluableNameConstants;
 import org.openmrs.module.amrsreport.rule.MohEvaluableRule;
 import org.openmrs.module.amrsreport.service.MohCoreService;
 import org.openmrs.module.amrsreport.util.MohFetchRestriction;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MohLocationRule extends MohEvaluableRule {
 
@@ -48,6 +40,18 @@ public class MohLocationRule extends MohEvaluableRule {
 
 	private static final MohCoreService mohCoreService = Context.getService(MohCoreService.class);
 
+    /**
+     * @should test for TRANSFER_CARE_TO_OTHER_CENTER using Obs
+     * @should  test for TRANSFER_CARE_TO_OTHER_CENTER within Ampath
+     * @should test for REASON_FOR_MISSED_VISIT using Obs
+     * @should test for TRANSFER_CARE_TO_OTHER_CENTER_DETAILED using Obs
+     * @should test for REASON_EXITED_CARE using Obs
+     * @should test for the OUTCOME_AT_END_OF_TUBERCULOSIS_TREATMENT using Obs
+     * @param context
+     * @param patientId
+     * @param parameters
+     * @return
+     */
 	@Override
 	protected Result evaluate(LogicContext context, Integer patientId, Map<String, Object> parameters) {
 		Result result = new Result();
