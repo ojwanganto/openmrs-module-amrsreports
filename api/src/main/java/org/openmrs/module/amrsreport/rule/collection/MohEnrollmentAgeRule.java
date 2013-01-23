@@ -18,15 +18,8 @@ import org.openmrs.module.amrsreport.rule.MohEvaluableRule;
 import org.openmrs.module.amrsreport.service.MohCoreService;
 import org.openmrs.module.amrsreport.util.MohFetchOrdering;
 import org.openmrs.module.amrsreport.util.MohFetchRestriction;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Author jmwogi
@@ -40,11 +33,14 @@ public class MohEnrollmentAgeRule extends MohEvaluableRule {
 	private static final EncounterType adultInitialType = MohCacheUtils.getEncounterType(MohEvaluableNameConstants.ENCOUNTER_TYPE_ADULT_INITIAL);
 	private static final EncounterType adultReturnType = MohCacheUtils.getEncounterType(MohEvaluableNameConstants.ENCOUNTER_TYPE_ADULT_RETURN);
 
-	private static final MohCoreService mohCoreService = Context.getService(MohCoreService.class);
+	private  MohCoreService mohCoreService = Context.getService(MohCoreService.class);
 
 	/**
 	 * @see org.openmrs.logic.Rule#eval(org.openmrs.logic.LogicContext, org.openmrs.Patient,
 	 *      java.util.Map)
+     *      @should return enrollment age for an adult
+     *      @should return enrollment age for a child
+     *      @should return UNKNOWN result
 	 */
 	public Result evaluate(LogicContext context, Integer patientId, Map<String, Object> parameters) throws LogicException {
 
@@ -64,6 +60,7 @@ public class MohEnrollmentAgeRule extends MohEvaluableRule {
 			List<Encounter> e = mohCoreService.getPatientEncounters(patientId, restrictions, mohFetchRestriction);
 
 			//Iterate though encounters for the patient
+
 			Date encounterDate = null;
 			Boolean isChild = true;
 			Iterator<Encounter> it = e.iterator();
