@@ -40,12 +40,7 @@ import java.util.Set;
 public class MOH361ACohortEvaluator implements CohortDefinitionEvaluator {
 
 	private static final Log log = LogFactory.getLog(MOH361ACohortEvaluator.class);
-	public static final String ENCOUNTER_TYPE_ADULT_RETURN = "ADULTRETURN";
-	public static final String ENCOUNTER_TYPE_ADULT_INITIAL = "ADULTINITIAL";
-	public static final String FIRST_HIV_RAPID_TEST_QUALITATIVE_CONCEPT = "HIV RAPID TEST, QUALITATIVE";
-	public static final String SECOND_HIV_RAPID_TEST_QUALITATIVE_CONCEPT = "HIV RAPID TEST 2, QUALITATIVE";
-	public static final String POSITIVE_CONCEPT = "POSITIVE";
-	public static final String HIV_ENZYME_IMMUNOASSAY_QUALITATIVE_CONCEPT = "HIV ENZYME IMMUNOASSAY, QUALITATIVE";
+
 
 	public EvaluatedCohort evaluate(final CohortDefinition cohortDefinition, final EvaluationContext evaluationContext) throws EvaluationException {
 
@@ -55,19 +50,36 @@ public class MOH361ACohortEvaluator implements CohortDefinitionEvaluator {
 		ConceptService conceptService = Context.getConceptService();
 		CohortDefinitionService definitionService = Context.getService(CohortDefinitionService.class);
 
-		// limit to people with adult initial or return encounters
-		EncounterCohortDefinition encounterCohortDefinition = new EncounterCohortDefinition();
-		encounterCohortDefinition.addEncounterType(service.getEncounterType(ENCOUNTER_TYPE_ADULT_INITIAL));
-		encounterCohortDefinition.addEncounterType(service.getEncounterType(ENCOUNTER_TYPE_ADULT_RETURN));
-		encounterCohortDefinition.setLocationList(mohCohortDefinition.getLocationList());
-		
-		// find people who had adult encounters at this location
-		Cohort encounterCohort = definitionService.evaluate(encounterCohortDefinition, evaluationContext);
 
-		// TODO set these with GPs and a settings page
-		Concept firstRapidConcept = conceptService.getConcept(FIRST_HIV_RAPID_TEST_QUALITATIVE_CONCEPT);
-		Concept secondRapidConcept = conceptService.getConcept(SECOND_HIV_RAPID_TEST_QUALITATIVE_CONCEPT);
-		Concept positiveConcept = conceptService.getConcept(POSITIVE_CONCEPT);
+        // Define concepts for children
+        Concept firstRapidConcept = conceptService.getConcept(MohEvaluableNameConstants.HIV_RAPID_TEST_QUALITATIVE);
+        Concept elisaConcept = conceptService.getConcept(MohEvaluableNameConstants.HIV_ENZYME_IMMUNOASSAY_QUALITATIVE);
+        Concept hivDnaPcrConcept = conceptService.getConcept(MohEvaluableNameConstants.HIV_DNA_PCR);
+        Concept positiveConcept = conceptService.getConcept(MohEvaluableNameConstants.POSITIVE);
+
+
+        // define concepts for location filter (transfers within and without Ampath centre)
+        Concept transferConcept = conceptService.getConcept(MohEvaluableNameConstants.TRANSFER_CARE_TO_OTHER_CENTER);
+        Concept withinConcept = conceptService.getConcept(MohEvaluableNameConstants.WITHIN_AMPATH_CLINICS);
+        Concept nonAmpathConcept = conceptService.getConcept(MohEvaluableNameConstants.NON_AMPATH);
+        Concept missedVisitConcept = conceptService.getConcept(MohEvaluableNameConstants.REASON_FOR_MISSED_VISIT);
+        Concept transferVisitConcept = conceptService.getConcept(MohEvaluableNameConstants.AMPATH_CLINIC_TRANSFER);
+        Concept transferCareToOtherCentreDetailed = conceptService.getConcept(MohEvaluableNameConstants.TRANSFER_CARE_TO_OTHER_CENTER_DETAILED);
+        Concept transferCareToOtherCentreDetailedPositive = conceptService.getConcept(MohEvaluableNameConstants.FREETEXT_GENERAL);
+        Concept reasonExitedCare = conceptService.getConcept(MohEvaluableNameConstants.REASON_EXITED_CARE);
+        Concept reasonExitedCareValue = conceptService.getConcept(MohEvaluableNameConstants.PATIENT_TRANSFERRED_OUT);
+
+        Concept tboutcome = conceptService.getConcept(MohEvaluableNameConstants.OUTCOME_AT_END_OF_TUBERCULOSIS_TREATMENT);
+        Concept tboutcomeValue = conceptService.getConcept(MohEvaluableNameConstants.PATIENT_TRANSFERRED_OUT);
+
+		// Define cohort using encounter types
+		EncounterCohortDefinition encounterCohortDefinition = new EncounterCohortDefinition();
+		encounterCohortDefinition.addEncounterType(service.getEncounterType(MohEvaluableNameConstants.ENCOUNTER_TYPE_ADULT_INITIAL));
+		encounterCohortDefinition.addEncounterType(service.getEncounterType(MohEvaluableNameConstants.ENCOUNTER_TYPE_ADULT_RETURN));
+        encounterCohortDefinition.addEncounterType(service.getEncounterType(MohEvaluableNameConstants.ENCOUNTER_TYPE_BASELINEINVESTIGATION));
+		encounterCohortDefinition.setLocationList(mohCohortDefinition.getLocationList());
+
+		Cohort encounterCohort = definitionService.evaluate(encounterCohortDefinition, evaluationContext);
 
 		// define search for all people who have rapid test positive results
 		CodedObsCohortDefinition firstRapidCohortDefinition = new CodedObsCohortDefinition();
@@ -77,74 +89,70 @@ public class MOH361ACohortEvaluator implements CohortDefinitionEvaluator {
 		firstRapidCohortDefinition.setOperator(SetComparator.IN);
 		firstRapidCohortDefinition.setValueList(Arrays.asList(positiveConcept));
 
-		// define search all people who have rapid test 2 positive results
-		CodedObsCohortDefinition secondRapidCohortDefinition = new CodedObsCohortDefinition();
-		secondRapidCohortDefinition.setTimeModifier(PatientSetService.TimeModifier.ANY);
-		secondRapidCohortDefinition.setLocationList(mohCohortDefinition.getLocationList());
-		secondRapidCohortDefinition.setQuestion(secondRapidConcept);
-		secondRapidCohortDefinition.setOperator(SetComparator.IN);
-		secondRapidCohortDefinition.setValueList(Arrays.asList(positiveConcept));
 
-		// combine rapid test definitions
-		CompositionCohortDefinition rapidCompositionCohortDefinition = new CompositionCohortDefinition();
-		rapidCompositionCohortDefinition.addSearch("PositiveFirstRapid", firstRapidCohortDefinition, null);
-		rapidCompositionCohortDefinition.addSearch("PositiveSecondRapid", secondRapidCohortDefinition, null);
-		rapidCompositionCohortDefinition.setCompositionString("PositiveFirstRapid OR PositiveSecondRapid");
-		Cohort rapidCompositionCohort = definitionService.evaluate(rapidCompositionCohortDefinition, evaluationContext);
+        // define search for kids with a positive elisa evaluation
+        CodedObsCohortDefinition elisaCohortDefinition = new CodedObsCohortDefinition();
+        elisaCohortDefinition.setTimeModifier(PatientSetService.TimeModifier.ANY);
+        elisaCohortDefinition.setLocationList(mohCohortDefinition.getLocationList());
+        elisaCohortDefinition.setQuestion(elisaConcept);
+        elisaCohortDefinition.setOperator(SetComparator.IN);
+        elisaCohortDefinition.setValueList(Arrays.asList(positiveConcept));
 
-		// set age limits
-		AgeCohortDefinition ageCohortDefinition = new AgeCohortDefinition();
-		ageCohortDefinition.setMinAge(18);
-		ageCohortDefinition.setMinAgeUnit(DurationUnit.MONTHS);
-		ageCohortDefinition.setMaxAge(14);
-		ageCohortDefinition.setMaxAgeUnit(DurationUnit.YEARS);
+        // set age limits
+        AgeCohortDefinition ageCohortDefinition = new AgeCohortDefinition();
+        ageCohortDefinition.setMinAge(18);
+        ageCohortDefinition.setMinAgeUnit(DurationUnit.MONTHS);
 
-		// TODO set this concept with a GP and settings page
-		Concept elisaConcept = conceptService.getConcept(HIV_ENZYME_IMMUNOASSAY_QUALITATIVE_CONCEPT);
+        /*Find all paeds who had elisa test positive and were at least 18 months old at the time*/
+        CompositionCohortDefinition elisaCompositionCohortDefinition = new CompositionCohortDefinition();
+        elisaCompositionCohortDefinition.addSearch("elisaAgeLimit", ageCohortDefinition, null);
+        elisaCompositionCohortDefinition.addSearch("PositiveElisa", elisaCohortDefinition, null);
+        elisaCompositionCohortDefinition.setCompositionString("elisaAgeLimit AND PositiveElisa");
 
-		// define search for all people with a positive elisa evaluation
-		CodedObsCohortDefinition elisaCohortDefinition = new CodedObsCohortDefinition();
-		elisaCohortDefinition.setTimeModifier(PatientSetService.TimeModifier.ANY);
-		elisaCohortDefinition.setLocationList(mohCohortDefinition.getLocationList());
-		elisaCohortDefinition.setQuestion(elisaConcept);
-		elisaCohortDefinition.setOperator(SetComparator.IN);
-		elisaCohortDefinition.setValueList(Arrays.asList(positiveConcept));
 
-		// find patients within age limits who had elisa positive results
-		CompositionCohortDefinition elisaCompositionCohortDefinition = new CompositionCohortDefinition();
-		elisaCompositionCohortDefinition.addSearch("PaediatricAge", ageCohortDefinition, null);
-		elisaCompositionCohortDefinition.addSearch("PositiveElisa", elisaCohortDefinition, null);
-		elisaCompositionCohortDefinition.setCompositionString("PaediatricAge AND PositiveElisa");
-		Cohort elisaCompositionCohort = definitionService.evaluate(elisaCompositionCohortDefinition, evaluationContext);
+        //find kids with HIV DNA PCR test positive
+        CodedObsCohortDefinition hivDnaPcrTestCohort = new CodedObsCohortDefinition();
+        hivDnaPcrTestCohort.setTimeModifier(PatientSetService.TimeModifier.ANY);
+        hivDnaPcrTestCohort.setLocationList(mohCohortDefinition.getLocationList());
+        hivDnaPcrTestCohort.setQuestion(hivDnaPcrConcept);
+        hivDnaPcrTestCohort.setOperator(SetComparator.IN);
+        hivDnaPcrTestCohort.setValueList(Arrays.asList(positiveConcept));
 
-		// Check for the elisa to make sure the elisa happened after 18 months
+        //combine tests for paeds
+        CompositionCohortDefinition finalPeadsCohortDef = new CompositionCohortDefinition();
+        finalPeadsCohortDef.addSearch("rapidCohortDef",firstRapidCohortDefinition, null);
+        finalPeadsCohortDef.addSearch("elisaCohortDef",elisaCohortDefinition, null);
+        finalPeadsCohortDef.addSearch("hivDnaPcrDef",hivDnaPcrTestCohort, null);
+        finalPeadsCohortDef.setCompositionString("rapidCohortDef OR elisaCohortDef OR hivDnaPcrDef");
+
+        Cohort paedsCompositionCohort = definitionService.evaluate(finalPeadsCohortDef, evaluationContext);
+
+
+		//find patients by location(health centre)
 		PersonAttributeCohortDefinition personAttributeCohortDefinition = new PersonAttributeCohortDefinition();
 		personAttributeCohortDefinition.setAttributeType(Context.getPersonService().getPersonAttributeTypeByName("Health Center"));
 		personAttributeCohortDefinition.setValueLocations(mohCohortDefinition.getLocationList());
 
-		// TODO use GPs and a settings page to configure these concepts
-		Concept transferConcept = conceptService.getConcept(MohEvaluableNameConstants.TRANSFER_CARE_TO_OTHER_CENTER);
-        Concept withinConcept = conceptService.getConcept(MohEvaluableNameConstants.WITHIN_AMPATH_CLINICS);
-        Concept nonAmpathConcept = conceptService.getConcept(MohEvaluableNameConstants.NON_AMPATH);
-		Concept missedVisitConcept = conceptService.getConcept(MohEvaluableNameConstants.REASON_FOR_MISSED_VISIT);
-		Concept transferVisitConcept = conceptService.getConcept(MohEvaluableNameConstants.AMPATH_CLINIC_TRANSFER);
-        Concept transferCareToOtherCentreDetailed = conceptService.getConcept(MohEvaluableNameConstants.TRANSFER_CARE_TO_OTHER_CENTER_DETAILED);
-        Concept transferCareToOtherCentreDetailedPositive = conceptService.getConcept(MohEvaluableNameConstants.FREETEXT_GENERAL);
-        Concept reasonExitedCare = conceptService.getConcept(MohEvaluableNameConstants.REASON_EXITED_CARE);
-        Concept reasonExitedCareValue = conceptService.getConcept(MohEvaluableNameConstants.PATIENT_TRANSFERRED_OUT);
 
-        Concept tboutcome = conceptService.getConcept(MohEvaluableNameConstants.OUTCOME_AT_END_OF_TUBERCULOSIS_TREATMENT);
-        Concept tboutcomeValue = conceptService.getConcept(MohEvaluableNameConstants.PATIENT_TRANSFERRED_OUT);
+        /*
+        * tests for transfers
+        * */
 
 
-
-		// define cohort for transfer in and out
 		CodedObsCohortDefinition transferCohortDefinition = new CodedObsCohortDefinition();
 		transferCohortDefinition.setTimeModifier(PatientSetService.TimeModifier.ANY);
 		transferCohortDefinition.setLocationList(mohCohortDefinition.getLocationList());
 		transferCohortDefinition.setQuestion(transferConcept);
 		transferCohortDefinition.setOperator(SetComparator.IN);
 		transferCohortDefinition.setValueList(Arrays.asList(withinConcept,nonAmpathConcept));
+
+        // define missed visits at this location
+        CodedObsCohortDefinition missedVisitCohortDefinition = new CodedObsCohortDefinition();
+        missedVisitCohortDefinition.setTimeModifier(PatientSetService.TimeModifier.ANY);
+        missedVisitCohortDefinition.setLocationList(mohCohortDefinition.getLocationList());
+        missedVisitCohortDefinition.setQuestion(missedVisitConcept);
+        missedVisitCohortDefinition.setOperator(SetComparator.IN);
+        missedVisitCohortDefinition.setValueList(Arrays.asList(transferVisitConcept));
 
         // Define cohort for transfer care to other centre detailed
         CodedObsCohortDefinition detailedTransfer = new CodedObsCohortDefinition();
@@ -154,25 +162,44 @@ public class MOH361ACohortEvaluator implements CohortDefinitionEvaluator {
         detailedTransfer.setOperator(SetComparator.IN);
         detailedTransfer.setValueList(Arrays.asList(transferCareToOtherCentreDetailedPositive));
 
-         /*
-         Combine cohorts for transfers and person attribute
-         find all people with proper initial health center locations and a transfer details
-          */
+        /*
+        * Combine results for transfers within,without,detailed and missed visits
+        * */
+
 
 		CompositionCohortDefinition transferCompositionCohortDefinition = new CompositionCohortDefinition();
-		transferCompositionCohortDefinition.addSearch("HealthCenterAttribute", personAttributeCohortDefinition, null);
-		transferCompositionCohortDefinition.addSearch("TransferWithinAndOutsideAmpath", transferCohortDefinition, null);
-        transferCompositionCohortDefinition.addSearch("TransferCareToOtherCentreDetailed",detailedTransfer, null);
-		transferCompositionCohortDefinition.setCompositionString("HealthCenterAttribute  TransferWithinAndOutsideAmpath TransferCareToOtherCentreDetailed");
+		transferCompositionCohortDefinition.addSearch("transferwithinNwithoutCoh", transferCohortDefinition, null);
+		transferCompositionCohortDefinition.addSearch("missedVisitsCoh", missedVisitCohortDefinition, null);
+        transferCompositionCohortDefinition.addSearch("detailedTransferCoh",detailedTransfer, null);
+		transferCompositionCohortDefinition.setCompositionString("transferwithinNwithoutCoh OR  missedVisitsCoh OR detailedTransferCoh");
+
 		Cohort transferCompositionCohort = definitionService.evaluate(transferCompositionCohortDefinition, evaluationContext);
-		
-		// define missed visits at this location
-		CodedObsCohortDefinition missedVisitCohortDefinition = new CodedObsCohortDefinition();
-		missedVisitCohortDefinition.setTimeModifier(PatientSetService.TimeModifier.ANY);
-		missedVisitCohortDefinition.setLocationList(mohCohortDefinition.getLocationList());
-		missedVisitCohortDefinition.setQuestion(missedVisitConcept);
-		missedVisitCohortDefinition.setOperator(SetComparator.IN);
-		missedVisitCohortDefinition.setValueList(Arrays.asList(transferVisitConcept));
+
+        /*
+        Cohort Definitions for transfer out due to exit from care
+        */
+        // define cohort for people who have exit care
+        CodedObsCohortDefinition careExitCohortDefinition = new CodedObsCohortDefinition();
+        careExitCohortDefinition.setTimeModifier(PatientSetService.TimeModifier.ANY);
+        careExitCohortDefinition.setLocationList(mohCohortDefinition.getLocationList());
+        careExitCohortDefinition.setQuestion(reasonExitedCare);
+        careExitCohortDefinition.setOperator(SetComparator.IN);
+        careExitCohortDefinition.setValueList(Arrays.asList(reasonExitedCareValue));
+
+
+        // define cohort for people who transferred out at the end of TB treatment
+        CodedObsCohortDefinition tBTreatmentCohortDefinition = new CodedObsCohortDefinition();
+        tBTreatmentCohortDefinition.setTimeModifier(PatientSetService.TimeModifier.ANY);
+        tBTreatmentCohortDefinition.setLocationList(mohCohortDefinition.getLocationList());
+        tBTreatmentCohortDefinition.setQuestion(missedVisitConcept);
+        tBTreatmentCohortDefinition.setOperator(SetComparator.IN);
+        tBTreatmentCohortDefinition.setValueList(Arrays.asList(transferVisitConcept));
+
+        //combine results for transfers outside ampath centres due to exit from program
+        CompositionCohortDefinition transferOutCompositionCohortDefinition = new CompositionCohortDefinition();
+        transferOutCompositionCohortDefinition.addSearch("exitCare",careExitCohortDefinition, null);
+        transferOutCompositionCohortDefinition.addSearch("endTBTreatment",tBTreatmentCohortDefinition, null);
+        transferOutCompositionCohortDefinition.setCompositionString("exitCare OR endTBTreatment");
 
 		// find all people with defined health center and a missed visit
 		CompositionCohortDefinition missedVisitCompositionCohortDefinition = new CompositionCohortDefinition();
@@ -181,6 +208,8 @@ public class MOH361ACohortEvaluator implements CohortDefinitionEvaluator {
 		missedVisitCompositionCohortDefinition.setCompositionString("HealthCenterAttribute AND MissedVisitTransfer");
 		Cohort missedVisitCompositionCohort = definitionService.evaluate(missedVisitCompositionCohortDefinition, evaluationContext);
 
+
+        //-------------------- just check up to this point. I havent finished combining the cohorts ---------
 		// build the patientIds by combining all found patients
 		Set<Integer> patientIds = new HashSet<Integer>();
 		patientIds.addAll(encounterCohort.getMemberIds());

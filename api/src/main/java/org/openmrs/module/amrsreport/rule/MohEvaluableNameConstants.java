@@ -125,6 +125,7 @@ public interface MohEvaluableNameConstants {
 	public static final String ENCOUNTER_TYPE_ANCRETURN = "ANCRETURN";
 	public static final String ENCOUNTER_TYPE_ADULT_INITIAL = "ADULTINITIAL";
 	public static final String ENCOUNTER_TYPE_ADULT_RETURN = "ADULTRETURN";
+    public static final String ENCOUNTER_TYPE_BASELINEINVESTIGATION = "BASELINEINVESTIGATION";
 	public static final String ENCOUNTER_TYPE_ADULT_NONCLINICALMEDICATION = "ADULTNONCLINICALMEDICATION";
 	public static final String ENCOUNTER_TYPE_DEATH_REPORT = "DEATHREPORT";
 	public static final String ENCOUNTER_TYPE_PEDIATRIC_INITIAL = "PEDSINITIAL";
