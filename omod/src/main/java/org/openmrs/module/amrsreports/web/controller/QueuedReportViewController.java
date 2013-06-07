@@ -49,6 +49,7 @@ public class QueuedReportViewController {
 			map.addAttribute("columnHeaders", csv.get("columnHeaders"));
 			map.addAttribute("records", csv.get("records"));
 			map.addAttribute("report", report);
+            map.addAttribute("historyURL",report.getCsvFilename());
 
 		} catch (Exception e) {
 			e.printStackTrace();
