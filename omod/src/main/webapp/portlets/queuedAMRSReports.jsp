@@ -1,5 +1,5 @@
 <%@ include file="/WEB-INF/template/include.jsp" %>
-
+<%@ taglib prefix="myfn" uri="/WEB-INF/view/module/amrsreports/resources/tags/custom.tld" %>
 <openmrs:htmlInclude file="/moduleResources/amrsreports/js/diQuery-collapsiblePanel.js"/>
 <openmrs:htmlInclude file="/moduleResources/amrsreports/css/queuedReportsPortlet.css"/>
 
@@ -63,11 +63,9 @@
                                                                                    type="textbox"/></span>
                             <c:choose>
                                 <c:when test="${model.status == 'NEW'}">
-                                    <c:forEach items="${model.repeatIntervalUnitMap}" var="thisReport">
-                                        <c:if test="${thisReport.key eq r}">
-                                            <c:set var="repeatUnit" value="${thisReport.value}"  />
-                                        </c:if>
-                                    </c:forEach>
+
+                                            <c:set var="repeatUnit" value="${myfn:intervalunit(model.repeatIntervalUnitMap,r)}"  />
+
                                         <span class="scheduledDate">run on <openmrs:formatDate date="${r.dateScheduled}"
                                                                                                format="${model.datetimeFormat}"/>  ${repeatUnit}</span>
                                 </c:when>
