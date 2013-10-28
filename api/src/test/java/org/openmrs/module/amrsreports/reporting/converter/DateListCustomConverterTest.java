@@ -27,6 +27,7 @@ import java.util.Set;
  * Test class for DateListCustomConverter
  */
 public class DateListCustomConverterTest extends TestCase {
+
 	public void testConvert() throws Exception {
 		String format = "MM/yyyy";
 

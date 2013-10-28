@@ -1,6 +1,5 @@
 package org.openmrs.module.amrsreports.reporting.converter;
 
-import com.sun.xml.internal.bind.v2.TODO;
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.module.amrsreports.snapshot.ARVPatientSnapshot;
 import org.openmrs.module.amrsreports.util.MOHReportUtil;
@@ -13,6 +12,14 @@ import java.util.List;
  * Converter for Patient Snapshots
  */
 public class ARVPatientSnapshotARTReasonConverter implements DataConverter {
+
+    /**
+     * @see DataConverter#convert(Object)
+     *
+     * @should return null if snapshot is null
+     * @should return null if no reason or ti exists
+     * @should return formatted reason and ti
+     */
 
 	@Override
 	public Object convert(Object original) {
