@@ -21,8 +21,8 @@ public class ARVPatientSnapshotARTReasonConverterTest {
         s.set("reason",ARVPatientSnapshot.REASON_CLINICAL);
         s.set("extras",extras);
 
-        Assert.assertEquals(new ARVPatientSnapshotARTReasonConverter().convert(s), "CLINICAL"
-                + "\n" + "WHO Stage 4");
+        Assert.assertEquals("CLINICAL"
+                + "\n" + "WHO Stage 4",new ARVPatientSnapshotARTReasonConverter().convert(s));
 
 
 
@@ -38,8 +38,8 @@ public class ARVPatientSnapshotARTReasonConverterTest {
         s.set("reason","CD4");
         s.set("extras",extras);
 
-        Assert.assertEquals(new ARVPatientSnapshotARTReasonConverter().convert(s), "CD4"
-                + "\n" + "CD4 Count: 500");
+        Assert.assertEquals("CD4"
+                + "\n" + "CD4 Count: 500",new ARVPatientSnapshotARTReasonConverter().convert(s));
 
 
 
@@ -55,8 +55,8 @@ public class ARVPatientSnapshotARTReasonConverterTest {
         s.set("reason",ARVPatientSnapshot.REASON_CLINICAL_CD4);
         s.set("extras",extras);
 
-        Assert.assertEquals(new ARVPatientSnapshotARTReasonConverter().convert(s), "WHO Stage 4"
-                + "\n" + "CD4 Count: 500");
+        Assert.assertEquals("WHO Stage 4"
+                + "\n" + "CD4 Count: 500",new ARVPatientSnapshotARTReasonConverter().convert(s));
 
     }
 

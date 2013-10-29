@@ -38,6 +38,22 @@ public class ARVPatientSnapshotARTReasonConverter implements DataConverter {
         String reason = (String)s.get("reason");
         String ti = (String)s.get("ti");
 
+        if(StringUtils.isNotBlank(ti) && StringUtils.isNotBlank(reason)){
+            results.add("TI");
+
+            if(StringUtils.equals(reason,ARVPatientSnapshot.REASON_CLINICAL)){
+                results.add("CLINICAL");
+            }
+            else if(StringUtils.equals(reason, "CD4"/*ARVPatientSnapshot.REASON_CLINICAL_CD4*/)){
+                results.add("CD4");
+            }
+            else {
+                results.add("CLINICAL + CD4");
+            }
+
+            return MOHReportUtil.joinAsSingleCell(results);
+        }
+
         if(StringUtils.equals(reason,ARVPatientSnapshot.REASON_CLINICAL)){
             results.add("CLINICAL");
 
@@ -46,7 +62,7 @@ public class ARVPatientSnapshotARTReasonConverter implements DataConverter {
 
         }
         //TODO: to find the right concept for CD4 only..using this tentatively
-        else if(StringUtils.equals(reason,ARVPatientSnapshot.REASON_CLINICAL_CD4)){
+        else if(StringUtils.equals(reason, "CD4"/*ARVPatientSnapshot.REASON_CLINICAL_CD4*/)){
             results.add("CD4");
 
             if (s.hasProperty("extras")){
@@ -67,12 +83,6 @@ public class ARVPatientSnapshotARTReasonConverter implements DataConverter {
             }
 
         }
-        else if(StringUtils.isNotBlank(ti)){
-            results.add("TI");
-        }
-
-
-
 
 		return MOHReportUtil.joinAsSingleCell(results);
 	}
