@@ -11,6 +11,7 @@ import org.openmrs.module.amrsreports.reporting.common.ObsRepresentation;
 import org.openmrs.module.amrsreports.reporting.common.ObsRepresentationDatetimeComparator;
 import org.openmrs.module.amrsreports.reporting.data.DateARTStartedDataDefinition;
 import org.openmrs.module.amrsreports.reporting.data.EligibilityForARTDataDefinition;
+import org.openmrs.module.amrsreports.reporting.data.TransferStatusDataDefinition;
 import org.openmrs.module.amrsreports.rule.MohEvaluableNameConstants;
 import org.openmrs.module.amrsreports.snapshot.ARVPatientSnapshot;
 import org.openmrs.module.amrsreports.util.MOHReportUtil;
@@ -37,6 +38,7 @@ public class EligibilityForARTDataEvaluator extends BatchedExecutionDataEvaluato
 
 	private Log log = LogFactory.getLog(getClass());
 
+    private Map<Integer, Object> transferStatus;
 	private Map<Integer, Object> artStartDates;
 
 	private EligibilityForARTDataDefinition definition;
@@ -75,6 +77,15 @@ public class EligibilityForARTDataEvaluator extends BatchedExecutionDataEvaluato
 		ARVPatientSnapshot snapshot = new ARVPatientSnapshot();
 		snapshot.setEvaluationDate(context.getEvaluationDate());
 
+
+        Boolean pTranferStatus = (Boolean)transferStatus.get(pId);
+
+        if(pTranferStatus){
+            snapshot.set("ti","TI");
+            return snapshot;
+
+        }
+
 		Iterator<ObsRepresentation> i = data.iterator();
 		while (i.hasNext()) {
 			ObsRepresentation o = i.next();
@@ -98,16 +109,17 @@ public class EligibilityForARTDataEvaluator extends BatchedExecutionDataEvaluato
 
 	@Override
 	protected boolean doBefore(EvaluationContext context, EvaluatedPersonData c, Cohort cohort) {
-		EvaluatedPersonData otherColumn;
+		EvaluatedPersonData otherColumn,transferStatusColumn;
 
 		try {
+            transferStatusColumn = Context.getService(PersonDataService.class).evaluate(new TransferStatusDataDefinition(), context);
 			otherColumn = Context.getService(PersonDataService.class).evaluate(new DateARTStartedDataDefinition(), context);
 		} catch (EvaluationException e) {
 			log.error("could not evaluate Date ART Started", e);
 			return false;
 		}
 		artStartDates = otherColumn.getData();
-
+        transferStatus = transferStatusColumn.getData();
 		return true;
 	}
 
