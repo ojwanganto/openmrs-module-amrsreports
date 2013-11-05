@@ -38,16 +38,17 @@ public class ARVPatientSnapshotARTReasonConverter implements DataConverter {
         String reason = (String)s.get("reason");
         String ti = (String)s.get("ti");
 
-        if(StringUtils.isNotBlank(ti) && StringUtils.isNotBlank(reason)){
+        /*test for TI and report back*/
+        if(StringUtils.isNotBlank(ti)){
             results.add("TI");
 
-            if(StringUtils.equals(reason,ARVPatientSnapshot.REASON_CLINICAL)){
+            if(StringUtils.isNotBlank(reason) && StringUtils.equals(reason,ARVPatientSnapshot.REASON_CLINICAL)){
                 results.add("CLINICAL");
             }
-            else if(StringUtils.equals(reason, "CD4"/*ARVPatientSnapshot.REASON_CLINICAL_CD4*/)){
+            else if(StringUtils.isNotBlank(reason) && StringUtils.equals(reason, "CD4")){
                 results.add("CD4");
             }
-            else {
+            else if (StringUtils.isNotBlank(reason) && StringUtils.equals(reason,ARVPatientSnapshot.REASON_CLINICAL_CD4) ){
                 results.add("CLINICAL + CD4");
             }
 
@@ -61,8 +62,10 @@ public class ARVPatientSnapshotARTReasonConverter implements DataConverter {
                 results.addAll((List<String>) s.get("extras"));
 
         }
-        //TODO: to find the right concept for CD4 only..using this tentatively
-        else if(StringUtils.equals(reason, "CD4"/*ARVPatientSnapshot.REASON_CLINICAL_CD4*/)){
+        /*this entirely requires the use of CD4 count or CD4 percent as eligibility criteria
+         *
+          * */
+        else if(StringUtils.equals(reason, "CD4")){
             results.add("CD4");
 
             if (s.hasProperty("extras")){
