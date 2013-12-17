@@ -35,8 +35,7 @@ public class ARVPatientSnapshot extends PatientSnapshot {
 	}
 
 	/**
-	 * @see PatientSnapshot#consume(java.util.Map)
-	 */
+     */
 	@Override
 	public Boolean consume(ObsRepresentation o) {
 		Integer q = o.getConceptId();
@@ -126,7 +125,8 @@ public class ARVPatientSnapshot extends PatientSnapshot {
 				this.set("extras", Collections.singletonList("WHO Stage 4"));
 				return true;
 
-			} else if (this.get("pedsWHOStage").equals(3)
+			}
+            else if (this.get("pedsWHOStage").equals(3)
 					&& (Double) this.get("cd4ByFacs") < 500d
 					&& (Double) this.get("cd4PercentByFacs") < 25d) {
 				this.set("reason", REASON_CLINICAL_CD4);
@@ -141,45 +141,77 @@ public class ARVPatientSnapshot extends PatientSnapshot {
 
 		// otherwise, check by age group
 		if (ageGroup.equals(MohEvaluableNameConstants.AgeGroup.UNDER_EIGHTEEN_MONTHS)) {
-			if (this.get("pedsWHOStage").equals(2)
-					&& (Double) this.get("cd4ByFacs") < 500d
-					&& (Boolean) this.get("HIVDNAPCRPositive")) {
+			if ((Boolean) this.get("HIVDNAPCRPositive")) {
 				this.set("reason", REASON_CLINICAL_CD4_HIV_DNA_PCR);
 				this.set("extras", Arrays.asList(
-						"WHO Stage 2",
-						String.format("CD4 Count: %.0f", this.get("cd4ByFacs")),
+						this.get("pedsWHOStage"),
+                        String.format("CD4 %%: %.0f", this.get("cd4PercentByFacs")),
 						"HIV DNA PCR: Positive"
 				));
 				return true;
 
-			} else if (this.get("pedsWHOStage").equals(1) && (Boolean) this.get("HIVDNAPCRPositive")) {
-				this.set("reason", REASON_CLINICAL_HIV_DNA_PCR);
-				this.set("extras", Arrays.asList(
-						"WHO Stage 1",
-						"HIV DNA PCR: Positive"
-				));
-				return true;
 			}
 
-		} else if (ageGroup.equals(MohEvaluableNameConstants.AgeGroup.EIGHTEEN_MONTHS_TO_FIVE_YEARS)
-				&& (this.get("pedsWHOStage").equals(1) || this.get("pedsWHOStage").equals(2))
-				&& (Double) this.get("cd4PercentByFacs") < 20d) {
-			this.set("reason", REASON_CLINICAL_CD4);
-			this.set("extras", Arrays.asList(
-					String.format("WHO Stage %d", this.get("pedsWHOStage")),
-					String.format("CD4 %%: %.0f", this.get("cd4PercentByFacs"))
-			));
-			return true;
+		} else if (ageGroup.equals(MohEvaluableNameConstants.AgeGroup.EIGHTEEN_MONTHS_TO_FIVE_YEARS)){
 
-		} else if (ageGroup.equals(MohEvaluableNameConstants.AgeGroup.FIVE_YEARS_TO_TWELVE_YEARS)
-				&& (this.get("pedsWHOStage").equals(1) || this.get("pedsWHOStage").equals(2))
-				&& (Double) this.get("cd4PercentByFacs") < 25d) {
-			this.set("reason", REASON_CLINICAL_CD4);
-			this.set("extras", Arrays.asList(
-					String.format("WHO Stage %d", this.get("pedsWHOStage")),
-					String.format("CD4 %%: %.0f", this.get("cd4PercentByFacs"))
-			));
-			return true;
+            if (this.get("pedsWHOStage").equals(3) || this.get("pedsWHOStage").equals(4)) {
+                this.set("reason", REASON_CLINICAL);
+                this.set("extras", Collections.singletonList(
+                        String.format("WHO Stage %d", this.get("pedsWHOStage"))));
+                return true;
+            }
+            else if((this.get("pedsWHOStage").equals(3) || this.get("pedsWHOStage").equals(4)) && (Double) this.get("cd4PercentByFacs") < 25d) {
+                this.set("reason", REASON_CLINICAL_CD4);
+                this.set("extras", Arrays.asList(
+                        String.format("WHO Stage %d", this.get("pedsWHOStage")),
+                        String.format("CD4 %%: %.0f", this.get("cd4PercentByFacs"))
+                ));
+                return true;
+            }
+            else if((Double) this.get("cd4PercentByFacs") < 25d){
+                this.set("reason", "CD4");
+                this.set("extras", Collections.singletonList(
+                        String.format("CD4 %%: %.0f", this.get("cd4PercentByFacs"))));
+                return true;
+            }
+
+
+		} else if (ageGroup.equals(MohEvaluableNameConstants.AgeGroup.FIVE_YEARS_TO_TWELVE_YEARS)){
+
+            if (this.get("pedsWHOStage").equals(3) || this.get("pedsWHOStage").equals(4)) {
+                this.set("reason", REASON_CLINICAL);
+                this.set("extras", Collections.singletonList(
+                        String.format("WHO Stage %d", this.get("pedsWHOStage"))));
+                return true;
+
+            } else if((this.get("pedsWHOStage").equals(3) || this.get("pedsWHOStage").equals(4)) && (Double) this.get("cd4PercentByFacs") < 20d) {
+                this.set("reason", REASON_CLINICAL_CD4);
+                this.set("extras", Arrays.asList(
+                        String.format("WHO Stage %d", this.get("pedsWHOStage")),
+                        String.format("CD4 %%: %.0f", this.get("cd4PercentByFacs"))
+                ));
+                return true;
+            }
+            else if((this.get("pedsWHOStage").equals(3) || this.get("pedsWHOStage").equals(4)) && (Double) this.get("cd4ByFacs") < 500d) {
+                this.set("reason", REASON_CLINICAL_CD4);
+                this.set("extras", Arrays.asList(
+                        String.format("WHO Stage %d", this.get("pedsWHOStage")),
+                        String.format("CD4 Count: %.0f", this.get("cd4ByFacs"))
+                ));
+                return true;
+            }
+            else if((Double) this.get("cd4PercentByFacs") < 20d){
+                this.set("reason", "CD4");
+                this.set("extras", Collections.singletonList(
+                        String.format("CD4 %%: %.0f", this.get("cd4PercentByFacs"))));
+                return true;
+            }
+            else if((Double) this.get("cd4ByFacs") < 500d){
+                this.set("reason", "CD4");
+                this.set("extras", Collections.singletonList(
+                        String.format("CD4 Count: %.0f", this.get("cd4ByFacs"))));
+                return true;
+            }
 
 		} else if (ageGroup.equals(MohEvaluableNameConstants.AgeGroup.ABOVE_TWELVE_YEARS)) {
 			if ((this.get("pedsWHOStage").equals(1) || this.get("pedsWHOStage").equals(2))
