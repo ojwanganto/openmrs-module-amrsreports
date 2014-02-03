@@ -15,6 +15,7 @@ package org.openmrs.module.amrsreports.reporting.data.evaluator;
 
 import org.openmrs.PersonAttributeType;
 import org.openmrs.annotation.Handler;
+import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.amrsreports.AmrsReportsConstants;
 import org.openmrs.module.amrsreports.model.PatientTBTreatmentData;
@@ -75,12 +76,16 @@ public class TbTreatmentStartDateDataEvaluator implements PersonDataEvaluator {
 
         /*get tb registration number for patients*/
 		String typeId = Context.getAdministrationService().getGlobalProperty(AmrsReportsConstants.TB_REGISTRATION_NO_ATTRIBUTE_TYPE);
-		PersonAttributeType pat = null;
+		PersonAttributeType pat;
 
 		try {
 			pat = Context.getPersonService().getPersonAttributeType(Integer.valueOf(typeId));
 		} catch (NumberFormatException e) {
 			pat = Context.getPersonService().getPersonAttributeType(AmrsReportsConstants.TB_REGISTRATION_NO_ATTRIBUTE_TYPE_DEFAULT);
+		}
+
+		if (pat == null) {
+			throw new APIException("Could not find TB Registration Number Person Attribute.");
 		}
 
 		PersonAttributeDataDefinition patientTBRegistrationDetails = new PersonAttributeDataDefinition(pat);
@@ -93,7 +98,6 @@ public class TbTreatmentStartDateDataEvaluator implements PersonDataEvaluator {
 		if (tbRegData.getData() != null)
 			regDetails = tbRegData.getData();
 
-
 		for (Integer memberId : context.getBaseCohort().getMemberIds()) {
 
 			PatientTBTreatmentData details = new PatientTBTreatmentData();
@@ -103,13 +107,12 @@ public class TbTreatmentStartDateDataEvaluator implements PersonDataEvaluator {
 
 			}
 
-			String tbRegistrationNo = null;
+			String tbRegistrationNo = "";
 			if (regDetails != null) {
 				Object regNoObj = regDetails.get(memberId);
 				tbRegistrationNo = String.valueOf(regNoObj);
 			}
-			if (tbRegistrationNo != null)
-				details.setTbRegNO(tbRegistrationNo);
+			details.setTbRegNO(tbRegistrationNo);
 
 			if (startDates.size() > 0)
 				details.setEvaluationDates(startDates);
