@@ -331,7 +331,6 @@ public interface MohEvaluableNameConstants {
     public static final String CONTINUOUS = "CONTINUOUS";
     public static final String REVIEW_OF_SYSTEMS_GENERAL = "REVIEW OF SYSTEMS, GENERAL";
     public static final String COUGH_FOR_MORE_THAN_TWO_WEEKS = "COUGH FOR MORE THAN TWO WEEKS";
-    public static final String TUBURCULOSIS_TREATMENT_PLAN = "TUBURCULOSIS TREATMENT PLAN";
     public static final String STOP_ALL_MEDICATIONS = "STOP ALL MEDICATIONS";
     public static final String NOT_DONE = "NOT DONE";
 

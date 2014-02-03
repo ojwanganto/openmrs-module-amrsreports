@@ -69,11 +69,11 @@ public class TBStatusDataEvaluatorTest extends BaseModuleContextSensitiveTest {
     }
 
     /**
-     * @should return value_datetime for PATIENT_REPORTED_X_RAY_CHEST_with_NORMAL
+     * @should return  NORMAL for PATIENT_REPORTED_X_RAY_CHEST
      * @throws Exception
      */
     @Test
-    public void shouldReturnValue_datetimeForPATIENT_REPORTED_X_RAY_CHEST_with_NORMAL() throws Exception {
+    public void shouldReturnNORMALForPATIENT_REPORTED_X_RAY_CHEST() throws Exception {
         MohTestUtils.addCodedObs(patient, MohEvaluableNameConstants.PATIENT_REPORTED_X_RAY_CHEST,
                 MohEvaluableNameConstants.NORMAL, "16 Oct 1990");
 
@@ -93,11 +93,11 @@ public class TBStatusDataEvaluatorTest extends BaseModuleContextSensitiveTest {
     }
 
  /**
- * @should return value_datetime for SPUTUM FOR AFB with NEGATIVE result
+ * @should return NEGATIVE for SPUTUM FOR AFB
  * @throws Exception
  */
         @Test
-        public void shouldReturnValue_datetimeForSPUTUM_FOR_AFB_with_NEGATIVE() throws Exception {
+        public void shouldReturnNEGATIVEForSPUTUM_FOR_AFB() throws Exception {
             MohTestUtils.addCodedObs(patient, MohEvaluableNameConstants.SPUTUM_FOR_AFB,
                     MohEvaluableNameConstants.NEGATIVE, "16 Oct 1990");
 
@@ -114,11 +114,11 @@ public class TBStatusDataEvaluatorTest extends BaseModuleContextSensitiveTest {
         }
 
     /**
-     * @should return value_datetime for COUGH DURATION, CODED with WEEKS result
+     * @should return WEEKS COUGH DURATION, CODED with WEEKS result
      * @throws Exception
      */
     @Test
-    public void shouldReturnValue_datetimeForCOUGH_DURATION_CODED_with_WEEKS() throws Exception {
+    public void shouldReturnWEEKSForCOUGH_DURATION_CODED() throws Exception {
         MohTestUtils.addCodedObs(patient, MohEvaluableNameConstants.COUGH_DURATION_CODED,
                 MohEvaluableNameConstants.WEEKS, "16 Oct 1990");
 
@@ -134,6 +134,153 @@ public class TBStatusDataEvaluatorTest extends BaseModuleContextSensitiveTest {
 
     }
 
+
+    /**
+     * @should return value_datetime for COUGH DURATION, CODED with MONTHS result
+     * @throws Exception
+     */
+    @Test
+    public void shouldReturnMONTHSForCOUGH_DURATION_CODED() throws Exception {
+        MohTestUtils.addCodedObs(patient, MohEvaluableNameConstants.COUGH_DURATION_CODED,
+                MohEvaluableNameConstants.MONTHS, "16 Oct 1990");
+
+        SortedObsFromDate actual  = getActualResult();
+        ArrayList<Obs> observations= new ArrayList<Obs>(actual.getData());
+
+        assertThat(observations.size(), is(1));
+
+        String valueCoded = observations.get(0).getValueCoded().getName().toString();
+        String thisConcept = observations.get(0).getConcept().getName().toString();
+        assertEquals(valueCoded,MohEvaluableNameConstants.MONTHS);
+        assertEquals(thisConcept,MohEvaluableNameConstants.COUGH_DURATION_CODED);
+
+    }
+
+    /**
+     * @should return CONTINUOUS for COUGH DURATION, CODED
+     * @throws Exception
+     */
+    @Test
+    public void shouldReturnCONTINUOUSForCOUGH_DURATION_CODED() throws Exception {
+        MohTestUtils.addCodedObs(patient, MohEvaluableNameConstants.COUGH_DURATION_CODED,
+                MohEvaluableNameConstants.CONTINUOUS, "16 Oct 1990");
+
+        SortedObsFromDate actual  = getActualResult();
+        ArrayList<Obs> observations= new ArrayList<Obs>(actual.getData());
+
+        assertThat(observations.size(), is(1));
+
+        String valueCoded = observations.get(0).getValueCoded().getName().toString();
+        String thisConcept = observations.get(0).getConcept().getName().toString();
+        assertEquals(valueCoded,MohEvaluableNameConstants.CONTINUOUS);
+        assertEquals(thisConcept,MohEvaluableNameConstants.COUGH_DURATION_CODED);
+
+    }
+
+
+    /**
+     * @should return NEGATIVE  for Spatum for AFB result
+     * @throws Exception
+     */
+    @Test
+    public void shouldTestForNegativeSpatumForAFB() throws Exception {
+        MohTestUtils.addCodedObs(patient, MohEvaluableNameConstants.SPUTUM_FOR_AFB,
+                MohEvaluableNameConstants.NEGATIVE, "16 Oct 1990");
+
+        SortedObsFromDate actual  = getActualResult();
+        ArrayList<Obs> observations= new ArrayList<Obs>(actual.getData());
+
+        assertThat(observations.size(), is(1));
+
+        String valueCoded = observations.get(0).getValueCoded().getName().toString();
+        String thisConcept = observations.get(0).getConcept().getName().toString();
+        assertEquals(valueCoded,MohEvaluableNameConstants.NEGATIVE);
+        assertEquals(thisConcept,MohEvaluableNameConstants.SPUTUM_FOR_AFB);
+
+    }
+
+
+    /**
+     *
+     * @should test if REVIEW OF SYSTEMS, GENERAL (1069) = COUGH FOR MORE THAN TWO WEEKS (6171)
+     * @throws Exception
+     */
+    @Test
+    public void shouldTestForREVIEW_OF_SYSTEMS_GENERAL() throws Exception {
+        MohTestUtils.addCodedObs(patient, MohEvaluableNameConstants.REVIEW_OF_SYSTEMS_GENERAL,
+                MohEvaluableNameConstants.COUGH_FOR_MORE_THAN_TWO_WEEKS, "16 Oct 1990");
+
+        SortedObsFromDate actual  = getActualResult();
+        ArrayList<Obs> observations= new ArrayList<Obs>(actual.getData());
+
+        assertThat(observations.size(), is(1));
+
+        String valueCoded = observations.get(0).getValueCoded().getName().toString();
+        String thisConcept = observations.get(0).getConcept().getName().toString();
+        assertEquals(valueCoded,MohEvaluableNameConstants.COUGH_FOR_MORE_THAN_TWO_WEEKS);
+        assertEquals(thisConcept,MohEvaluableNameConstants.REVIEW_OF_SYSTEMS_GENERAL);
+
+    }
+
+    /**
+     *
+     * @should test if PATIENT REPORTED X-RAY, CHEST (7178) <> NORMAL (1115)
+     * @throws Exception
+     */
+    @Test
+    public void shouldTestifPATIENT_REPORTED_X_RAY_CHEST_isNormal() throws Exception {
+        MohTestUtils.addCodedObs(patient, MohEvaluableNameConstants.PATIENT_REPORTED_X_RAY_CHEST,
+                MohEvaluableNameConstants.NORMAL, "16 Oct 1990");
+
+        SortedObsFromDate actual  = getActualResult();
+        ArrayList<Obs> observations= new ArrayList<Obs>(actual.getData());
+
+        assertThat(observations.size(), is(1));
+
+        String valueCoded = observations.get(0).getValueCoded().getName().toString();
+        String thisConcept = observations.get(0).getConcept().getName().toString();
+        assertEquals(valueCoded,MohEvaluableNameConstants.NORMAL);
+        assertEquals(thisConcept,MohEvaluableNameConstants.PATIENT_REPORTED_X_RAY_CHEST);
+
+    }
+
+    /**
+     *
+     * @should test if TUBERCULOSIS TREATMENT PLAN (1268) <> NONE (1107)
+     * @throws Exception
+     */
+    @Test
+    public void shouldTestifTUBERCULOSIS_TREATMENT_PLAN_isNotNONE() throws Exception {
+        MohTestUtils.addCodedObs(patient, MohEvaluableNameConstants.TUBERCULOSIS_TREATMENT_PLAN,
+                MohEvaluableNameConstants.START_DRUGS, "16 Oct 1990");
+
+        SortedObsFromDate actual  = getActualResult();
+        ArrayList<Obs> observations= new ArrayList<Obs>(actual.getData());
+
+        assertThat(observations.size(), is(1));
+
+    }
+
+    /**
+     * @should return NOT DONE  for Spatum for AFB result
+     * @throws Exception
+     */
+    @Test
+    public void shouldReturnNotDoneForSpatumForAFB() throws Exception {
+        MohTestUtils.addCodedObs(patient, MohEvaluableNameConstants.SPUTUM_FOR_AFB,
+                MohEvaluableNameConstants.NOT_DONE, "16 Oct 1990");
+
+        SortedObsFromDate actual  = getActualResult();
+        ArrayList<Obs> observations= new ArrayList<Obs>(actual.getData());
+
+        assertThat(observations.size(), is(1));
+
+        String valueCoded = observations.get(0).getValueCoded().getName().toString();
+        String thisConcept = observations.get(0).getConcept().getName().toString();
+        assertEquals(valueCoded,MohEvaluableNameConstants.NOT_DONE);
+        assertEquals(thisConcept,MohEvaluableNameConstants.SPUTUM_FOR_AFB);
+
+    }
 
 
     private SortedObsFromDate getActualResult() throws EvaluationException {
