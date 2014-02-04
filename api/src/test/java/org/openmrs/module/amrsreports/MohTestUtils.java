@@ -131,7 +131,7 @@ public class MohTestUtils {
 		o.setConcept(MohCacheUtils.getConcept(conceptName));
 		o.setValueCoded(MohCacheUtils.getConcept(conceptAnswer));
 		o.setObsDatetime(MohTestUtils.makeDate(date));
-		Obs obs = Context.getObsService().saveObs(o, null);
+		Context.getObsService().saveObs(o, null);
 	}
 
     public static void addDateTimeObs(Patient p, String conceptName, String conceptAnswer, String date) {
