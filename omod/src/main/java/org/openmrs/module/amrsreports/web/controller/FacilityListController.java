@@ -26,9 +26,9 @@ public class FacilityListController {
 	public List<MOHFacility> getAllFacilities() {
 
         UserFacilityService userFacilityService = Context.getService(UserFacilityService.class);
-
         User currentUser = Context.getAuthenticatedUser();
         List<MOHFacility> relevantFacilities = userFacilityService.getAllowedFacilitiesForUser(currentUser);
+
         return relevantFacilities;
 	}
 
