@@ -35,7 +35,7 @@ public class ARVPatientSnapshot extends PatientSnapshot {
 	}
 
 	/**
-	 * @see PatientSnapshot#consume(java.util.Map)
+	 * @see PatientSnapshot#consume(ObsRepresentation)
 	 */
 	@Override
 	public Boolean consume(ObsRepresentation o) {
@@ -141,27 +141,37 @@ public class ARVPatientSnapshot extends PatientSnapshot {
 
 		// otherwise, check by age group
 		if (ageGroup.equals(MohEvaluableNameConstants.AgeGroup.UNDER_EIGHTEEN_MONTHS)) {
-			if (this.get("pedsWHOStage").equals(2)
-					&& (Double) this.get("cd4ByFacs") < 500d
-					&& (Boolean) this.get("HIVDNAPCRPositive")) {
-				this.set("reason", REASON_CLINICAL_CD4_HIV_DNA_PCR);
-				this.set("extras", Arrays.asList(
-						"WHO Stage 2",
-						String.format("CD4 Count: %.0f", this.get("cd4ByFacs")),
-						"HIV DNA PCR: Positive"
-				));
-				return true;
 
-			} else if (this.get("pedsWHOStage").equals(1) && (Boolean) this.get("HIVDNAPCRPositive")) {
-				this.set("reason", REASON_CLINICAL_HIV_DNA_PCR);
-				this.set("extras", Arrays.asList(
-						"WHO Stage 1",
-						"HIV DNA PCR: Positive"
-				));
-				return true;
-			}
+            if((Boolean) this.get("HIVDNAPCRPositive")){
 
-		} else if (ageGroup.equals(MohEvaluableNameConstants.AgeGroup.EIGHTEEN_MONTHS_TO_FIVE_YEARS)
+                String whoStage = (String)this.get("pedsWHOStage");
+
+                if ((Double) this.get("cd4ByFacs") < 500d
+                        && (Boolean) this.get("HIVDNAPCRPositive")) {
+                    this.set("reason", REASON_CLINICAL_CD4_HIV_DNA_PCR);
+                    this.set("extras", Arrays.asList(
+                            whoStage,
+                            String.format("CD4 Count: %.0f", this.get("cd4ByFacs")),
+                            "HIV DNA PCR: Positive"
+                    ));
+                    return true;
+
+                }
+                else if ((Boolean) this.get("HIVDNAPCRPositive")) {
+                    this.set("reason", REASON_CLINICAL_HIV_DNA_PCR);
+                    this.set("extras", Arrays.asList(
+                            whoStage,
+                            "HIV DNA PCR: Positive"
+                    ));
+                    return true;
+                }
+
+            }
+
+            return true;
+		}
+
+        if (ageGroup.equals(MohEvaluableNameConstants.AgeGroup.EIGHTEEN_MONTHS_TO_FIVE_YEARS)
 				&& (this.get("pedsWHOStage").equals(1) || this.get("pedsWHOStage").equals(2))
 				&& (Double) this.get("cd4PercentByFacs") < 20d) {
 			this.set("reason", REASON_CLINICAL_CD4);

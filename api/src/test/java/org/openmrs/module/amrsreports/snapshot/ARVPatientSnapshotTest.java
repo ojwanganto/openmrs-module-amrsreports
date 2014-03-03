@@ -1,81 +1,79 @@
 package org.openmrs.module.amrsreports.snapshot;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
+import org.openmrs.module.amrsreports.cache.MohCacheUtils;
+import org.openmrs.module.amrsreports.reporting.common.ObsRepresentation;
 import org.openmrs.module.amrsreports.rule.MohEvaluableNameConstants;
 import org.openmrs.module.amrsreports.MohTestUtils;
+import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.openmrs.test.TestUtil;
+
+import java.util.Date;
 
 /**
  * Test class for PatientSnapshot
  */
-public class ARVPatientSnapshotTest {
+public class ARVPatientSnapshotTest extends BaseModuleContextSensitiveTest {
 
 //	private static final ConceptService conceptService = Context.getConceptService();
 	private static final ConceptService conceptService = null;
+
+    @Before
+    public void setUp() throws Exception{
+        executeDataSet("datasets/concepts-who-stage.xml");
+    }
 
 	/**
 	 * @verifies recognize and set WHO stage from an obs or specify peds WHO
 	 * @see org.openmrs.module.amrsreports.snapshot.PatientSnapshot#consume(org.openmrs.Obs)
 	 */
-	@Test
-	@Ignore
-	public void consume_shouldRecognizeAndSetWHOStageFromAnObsOrSpecifyPedsWHO() throws Exception {
-		// create mock data for reference in this test
-        MohTestUtils.createQuestion(MohEvaluableNameConstants.WHO_STAGE_ADULT, new String[]{
-				MohEvaluableNameConstants.WHO_STAGE_1_ADULT,
-				MohEvaluableNameConstants.WHO_STAGE_2_ADULT,
-				MohEvaluableNameConstants.WHO_STAGE_3_ADULT,
-				MohEvaluableNameConstants.WHO_STAGE_4_ADULT
-		});
-        MohTestUtils.createQuestion(MohEvaluableNameConstants.WHO_STAGE_PEDS, new String[]{
-				MohEvaluableNameConstants.WHO_STAGE_1_PEDS,
-				MohEvaluableNameConstants.WHO_STAGE_2_PEDS,
-				MohEvaluableNameConstants.WHO_STAGE_3_PEDS,
-				MohEvaluableNameConstants.WHO_STAGE_4_PEDS
-		});
-        MohTestUtils.createQuestion(MohEvaluableNameConstants.HIV_DNA_PCR, new String[]{
-				MohEvaluableNameConstants.POSITIVE
-		});
+    @Test
+    @Ignore
+    public void shouldCheckContentOfTestDataset() throws Exception {
+        TestUtil.printOutTableContents(getConnection(),"concept,concept_name");
+    }
 
-		/*Set concepts for adults*/
-		Obs obs = new Obs();
-		obs.setConcept(conceptService.getConceptByName(MohEvaluableNameConstants.WHO_STAGE_ADULT));
-		obs.setValueCoded(conceptService.getConceptByName(MohEvaluableNameConstants.WHO_STAGE_2_ADULT));
+    @Test
+    public void shouldConfirmAdultWhoStage(){
+        ARVPatientSnapshot arvPatientSnapshot = new ARVPatientSnapshot();
+        Obs adultStage2 = makeObs(MohEvaluableNameConstants.WHO_STAGE_ADULT, MohEvaluableNameConstants.WHO_STAGE_2_ADULT, MohTestUtils.makeDate("25 Jan 2010"));
+        ObsRepresentation or = makeObsRepresentation(adultStage2);
+        arvPatientSnapshot.consume(or);
+        Assert.assertEquals(2, arvPatientSnapshot.get("adultWHOStage"));
+    }
 
-		/*Set concepts for peds*/
-		Obs obsPeds = new Obs();
-		obsPeds.setConcept(conceptService.getConceptByName(MohEvaluableNameConstants.WHO_STAGE_PEDS));
-		obsPeds.setValueCoded(conceptService.getConceptByName(MohEvaluableNameConstants.WHO_STAGE_2_PEDS));
+    @Test
+    public void shouldConfirmPedsWhoStage(){
+        ARVPatientSnapshot arvPatientSnapshot = new ARVPatientSnapshot();
+        Obs pedStage2 = makeObs(MohEvaluableNameConstants.WHO_STAGE_PEDS, MohEvaluableNameConstants.WHO_STAGE_2_PEDS, MohTestUtils.makeDate("25 Jan 2010"));
 
-		/*Set concepts for hiv dna pcr*/
-		Obs obsHiv = new Obs();
-		obsHiv.setConcept(conceptService.getConceptByName(MohEvaluableNameConstants.HIV_DNA_PCR));
-		obsHiv.setValueCoded(conceptService.getConceptByName(MohEvaluableNameConstants.POSITIVE));
+        ObsRepresentation or = makeObsRepresentation(pedStage2);
+        arvPatientSnapshot.consume(or);
+        arvPatientSnapshot.consume(pedStage2);
+        Assert.assertEquals(2, arvPatientSnapshot.get("pedsWHOStage"));
+    }
 
-		ARVPatientSnapshot arvPatientSnapshot = new ARVPatientSnapshot();
+    @Test
+    public void shouldTestForHivDNAPCR(){
+        ARVPatientSnapshot arvPatientSnapshot = new ARVPatientSnapshot();
+        Obs obsHiv = makeObs(MohEvaluableNameConstants.HIV_DNA_PCR, MohEvaluableNameConstants.POSITIVE, MohTestUtils.makeDate("25 Jan 2010"));
 
-		/*Test result for adults*/
-		arvPatientSnapshot.consume(obs);
-		Assert.assertEquals(2, arvPatientSnapshot.get("adultWHOStage"));
-
-		/*Test results for peds*/
-		arvPatientSnapshot.consume(obsPeds);
-		Assert.assertEquals(2, arvPatientSnapshot.get("pedsWHOStage"));
-
-		/*Test results for HIV_DNA_PCR*/
-		arvPatientSnapshot.consume(obsHiv);
-		Assert.assertTrue((Boolean) arvPatientSnapshot.get("HIVDNAPCRPositive"));
-	}
+        ObsRepresentation or = makeObsRepresentation(obsHiv);
+        arvPatientSnapshot.consume(or);
+        arvPatientSnapshot.consume(obsHiv);
+        Assert.assertEquals(true, arvPatientSnapshot.get("HIVDNAPCRPositive"));
+    }
 
 	/**
 	 * @verifies determine eligibility based on age group and flags
 	 * @see org.openmrs.module.amrsreports.snapshot.PatientSnapshot#eligible()
 	 */
 	@Test
-	@Ignore
 	public void eligible_shouldDetermineEligibilityBasedOnAgeGroupAndFlags() throws Exception {
 
 		ARVPatientSnapshot arvPatientSnapshot = new ARVPatientSnapshot();
@@ -89,4 +87,23 @@ public class ARVPatientSnapshotTest {
 		arvPatientSnapshot.set("reason", "Clinical Only");
 		Assert.assertEquals("That is pedsWHOStage", 4, arvPatientSnapshot.get("pedsWHOStage"));
 	}
+
+    private Obs makeObs(String conceptName, String conceptAnswer, Date date) {
+        Obs o = new Obs();
+        o.setConcept(MohCacheUtils.getConcept(conceptName));
+        o.setValueCoded(MohCacheUtils.getConcept(conceptAnswer));
+        o.setObsDatetime(date);
+        return o;
+    }
+
+    /*make ObsRepresentation from Obs for consumption by PatientSnapshot*/
+    private ObsRepresentation makeObsRepresentation(Obs obs){
+
+        ObsRepresentation obsRepresentation = new ObsRepresentation();
+        obsRepresentation.setConceptId(obs.getConcept().getConceptId());
+        obsRepresentation.setValueCodedId(obs.getValueCoded().getConceptId());
+        obsRepresentation.setObsDatetime(obs.getObsDatetime());
+        return obsRepresentation;
+
+    }
 }

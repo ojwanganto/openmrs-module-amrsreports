@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <!-- define concepts for adults who stages-->
+  <concept concept_id="5356" retired="0" datatype_id="4" class_id="3" is_set="0" creator="1" date_created="2004-07-15 00:00:00.0" version="" changed_by="1" date_changed="2005-02-18 15:55:07.0" uuid="a8989396-1350-11df-a1f1-0026b9348838"/>
+  <concept concept_id="1204" retired="0" datatype_id="4" class_id="11" is_set="0" creator="1" date_created="2005-01-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-23 21:49:05.0" uuid="a899e0ac-1350-11df-a1f1-0026b9348838"/>
+  <concept concept_id="1205" retired="0" datatype_id="4" class_id="7" is_set="0" creator="1" date_created="2005-01-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-23 21:49:05.0" uuid="a899e282-1350-11df-a1f1-0026b9348838"/>
+  <concept concept_id="1206" retired="0" datatype_id="4" class_id="7" is_set="0" creator="1" date_created="2005-01-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-23 21:49:05.0" uuid="a899e283-1350-11df-a1f1-0026b9348838"/>
+  <concept concept_id="1207" retired="0" datatype_id="4" class_id="7" is_set="0" creator="1" date_created="2005-01-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-23 21:49:05.0" uuid="a899e284-1350-11df-a1f1-0026b9348838"/>
+
+    <!--Define concepts for peds who stages-->
+  <concept concept_id="1224" retired="0" datatype_id="4" class_id="7" is_set="0" creator="1" date_created="2005-01-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-23 21:49:05.0" uuid="a899e285-1350-11df-a1f1-0026b9348838"/>
+  <concept concept_id="1220" retired="0" datatype_id="4" class_id="7" is_set="0" creator="1" date_created="2005-01-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-23 21:49:05.0" uuid="a899e286-1350-11df-a1f1-0026b9348838"/>
+  <concept concept_id="1221" retired="0" datatype_id="4" class_id="7" is_set="0" creator="1" date_created="2005-01-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-23 21:49:05.0" uuid="a899e288-1350-11df-a1f1-0026b9348838"/>
+  <concept concept_id="1222" retired="0" datatype_id="4" class_id="7" is_set="0" creator="1" date_created="2005-01-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-23 21:49:05.0" uuid="a899e289-1350-11df-a1f1-0026b9348838"/>
+  <concept concept_id="1223" retired="0" datatype_id="4" class_id="7" is_set="0" creator="1" date_created="2005-01-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-23 21:49:05.0" uuid="a899e290-1350-11df-a1f1-0026b9348838"/>
+
+  <concept concept_id="1030" retired="0" datatype_id="4" class_id="7" is_set="0" creator="1" date_created="2005-01-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-23 21:49:05.0"  uuid="a899e291-1350-11df-a1f1-0026b9348838"/>
+  <concept concept_id="5497" retired="0" datatype_id="4" class_id="7" is_set="0" creator="1" date_created="2005-01-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-23 21:49:05.0" uuid="a899e292-1350-11df-a1f1-0026b9348838"/>
+  <concept concept_id="730" retired="0" datatype_id="4" class_id="7" is_set="0" creator="1" date_created="2005-01-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-23 21:49:05.0" uuid="a899e293-1350-11df-a1f1-0026b9348838"/>
+  <concept concept_id="703" retired="0" datatype_id="4" class_id="7" is_set="0" creator="1" date_created="2005-01-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-23 21:49:05.0" uuid="a899e294-1350-11df-a1f1-0026b9348838"/>
+
+
+  <!--concept names for adult who stage-->
+  <concept_name concept_id="5356" name="CURRENT WHO HIV STAGE" locale="en" creator="1" date_created="2004-07-15 00:00:00.0" concept_name_id="5356" voided="0" uuid="a9411070-1350-11df-a1f1-0026b9348845" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+  <concept_name concept_id="1204" name="WHO STAGE 1 ADULT" locale="en" creator="1" date_created="2005-01-12 00:00:00.0" concept_name_id="1204" voided="0" uuid="a941f4b8-1350-11df-a1f1-0026b9348846" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+  <concept_name concept_id="1205" name="WHO STAGE 2 ADULT" locale="en" creator="1" date_created="2005-01-12 00:00:00.0" concept_name_id="1205" voided="0" uuid="a941f666-1350-11df-a1f1-0026b9348847" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+  <concept_name concept_id="1206" name="WHO STAGE 3 ADULT" locale="en" creator="1" date_created="2004-07-15 00:00:00.0" concept_name_id="1206" voided="0" uuid="a9411070-1350-11df-a1f1-0026b9348848" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+  <concept_name concept_id="1207" name="WHO STAGE 4 ADULT" locale="en" creator="1" date_created="2005-01-12 00:00:00.0" concept_name_id="1207" voided="0" uuid="a941f4b8-1350-11df-a1f1-0026b9348849" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+
+  <!--concept names for peds who stages-->
+  <concept_name concept_id="1224" name="PEDS WHO CATEGORY QUERY" locale="en" creator="1" date_created="2005-01-12 00:00:00.0" concept_name_id="1224" voided="0" uuid="a941f666-1350-11df-a1f1-0026b9348850" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+  <concept_name concept_id="1220" name="WHO STAGE 1 PEDS" locale="en" creator="1" date_created="2004-07-15 00:00:00.0" concept_name_id="1220" voided="0" uuid="a9411070-1350-11df-a1f1-0026b9348851" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+  <concept_name concept_id="1221" name="WHO STAGE 2 PEDS" locale="en" creator="1" date_created="2005-01-12 00:00:00.0" concept_name_id="1221" voided="0" uuid="a941f666-1350-11df-a1f1-0026b9348853" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+  <concept_name concept_id="1222" name="WHO STAGE 3 PEDS" locale="en" creator="1" date_created="2004-07-15 00:00:00.0" concept_name_id="1222" voided="0" uuid="a9411070-1350-11df-a1f1-0026b9348854" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+  <concept_name concept_id="1223" name="WHO STAGE 4 PEDS" locale="en" creator="1" date_created="2005-01-12 00:00:00.0" concept_name_id="1223" voided="0" uuid="a941f4b8-1350-11df-a1f1-0026b9348855" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+
+
+  <concept_name concept_id="1030" name="HIV DNA POLYMERASE CHAIN REACTION, QUALITATIVE" locale="en" creator="1" date_created="2005-01-12 00:00:00.0" concept_name_id="1030" voided="0" uuid="a941f666-1350-11df-a1f1-0026b9348856" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+  <concept_name concept_id="5497" name="CD4, BY FACS" locale="en" creator="1" date_created="2004-07-15 00:00:00.0" concept_name_id="5497" voided="0" uuid="a9411070-1350-11df-a1f1-0026b9348857" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+  <concept_name concept_id="730" name="CD4 PERCENT" locale="en" creator="1" date_created="2005-01-12 00:00:00.0" concept_name_id="730" voided="0" uuid="a941f4b8-1350-11df-a1f1-0026b9348858" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+  <concept_name concept_id="703" name="POSITIVE" locale="en" creator="1" date_created="2005-01-12 00:00:00.0" concept_name_id="703" voided="0" uuid="a941f666-1350-11df-a1f1-0026b9348859" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+
+</dataset>

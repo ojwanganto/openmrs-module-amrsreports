@@ -56,6 +56,7 @@ public class MohTestUtils {
 
         // save the question
         conceptService.saveConcept(q);
+
     }
 
 	public static Patient createTestPatient() {
