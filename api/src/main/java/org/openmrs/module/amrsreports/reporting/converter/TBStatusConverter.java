@@ -170,11 +170,17 @@ public class TBStatusConverter implements DataConverter {
 		this.interval = interval;
 	}
 
-	protected String getTBStatusCode(Obs obs) {
+	protected String getTBStatusCode(final Obs obs) {
 
+        if(obs==null){
+            return null;
+        }
 		Integer conceptId = obs.getConcept().getConceptId();
 		Integer conceptAnswer = obs.getValueCoded().getConceptId();
 
+        if(conceptId==null || conceptAnswer==null){
+            return null;
+        }
         /**
          * Handle codes for no signs and symptoms
          */

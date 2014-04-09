@@ -13,6 +13,7 @@
  */
 package org.openmrs.module.amrsreports.cache;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
@@ -33,6 +34,9 @@ public final class MohCacheUtils {
 		Concept concept = cacheInstance.get(conceptName);
 		if (concept == null) {
 			concept = Context.getConceptService().getConcept(conceptName);
+            if(concept ==null){
+                return null;
+            }
 			cacheInstance.add(conceptName, concept);
 		}
 		return concept;
@@ -81,7 +85,13 @@ public final class MohCacheUtils {
 	}
 
 	public static Integer getConceptId(String conceptName) {
-		Concept concept = getConcept(conceptName);
-		return concept.getId();
+        Integer conceptId = null;
+        if(StringUtils.isNotEmpty(conceptName)){
+
+		    Concept concept = getConcept(conceptName);
+            conceptId = concept ==null? null:concept.getId();
+
+        }
+        return conceptId;
 	}
 }
